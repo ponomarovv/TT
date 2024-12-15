@@ -66,8 +66,11 @@ public class ProjectService : IProjectService
         if (project == null) throw new NotFoundException("Project not found.");
 
         var model = _mapper.Map<ProjectModel>(project);
-        model.TotalTimeSpent = project.TimeEntries
-            .Aggregate(TimeSpan.Zero, (sum, entry) => sum + (entry.EndTime - entry.StartTime));
+        
+        double totalTimeSpent = project.TimeEntries
+            .Sum(te => (te.EndTime - te.StartTime).TotalHours);
+        
+        model.TotalTimeSpent = totalTimeSpent;
         return model;
     }
 }
