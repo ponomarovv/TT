@@ -26,6 +26,26 @@ namespace TT.BLL.Services
             return _mapper.Map<ProjectModel>(project);
         }
 
+        public async Task<ProjectModel> CompleteProjectAsync(int id)
+        {
+            var project = await _dbContext.Projects.FindAsync(id);
+
+            if (project == null)
+            {
+                throw new NotFoundException("Project not found.");
+            }
+
+            if (project.IsCompleted)
+            {
+                throw new BadRequestException("Project is already completed.");
+            }
+
+            project.IsCompleted = true;
+            await _dbContext.SaveChangesAsync();
+            
+            return _mapper.Map<ProjectModel>(project);
+        }
+
         public async Task DeleteProjectAsync(int projectId)
         {
             var project = await _dbContext.Projects.FindAsync(projectId);
@@ -53,7 +73,7 @@ namespace TT.BLL.Services
         public async Task<ProjectModel> GetProjectAsync(int projectId)
         {
             var project = await _dbContext.Projects.Include(p => p.TimeEntries).FirstOrDefaultAsync(p => p.Id == projectId);
-            if (project == null) throw new KeyNotFoundException("Project not found.");
+            if (project == null) throw new NotFoundException("Project not found.");
 
             var model = _mapper.Map<ProjectModel>(project);
             model.TotalTimeSpent = project.TimeEntries

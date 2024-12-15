@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using TT.BLL.Exceptions;
 using TT.BLL.Models;
 using TT.BLL.Services;
 
@@ -16,11 +17,32 @@ namespace TT.API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateProject(string name, DateTime? startTime = null, DateTime? endTime = null)
+        public async Task<IActionResult> CreateProject(string name, DateTime? startTime = null,
+            DateTime? endTime = null)
         {
             var project = await _projectService.CreateProjectAsync(name, startTime, endTime);
             return Ok(project);
         }
+
+
+        [HttpPatch("{id}/complete")]
+        public async Task<IActionResult> CompleteProject(int id)
+        {
+            try
+            {
+                await _projectService.CompleteProjectAsync(id);
+                return NoContent();
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(new { Message = ex.Message });
+            }
+            catch (BadRequestException ex)
+            {
+                return BadRequest(new { Message = ex.Message });
+            }
+        }
+
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteProject(int id)

@@ -21,12 +21,17 @@ namespace TT.BLL.Services
         public async Task<TimeEntryDTO> CreateTimeEntryAsync(CreateTimeEntryDTO model)
         {
             var project = await _dbContext.Projects
-                .Where(p => p.Id == model.ProjectId && !p.IsCompleted)
+                .Where(p => p.Id == model.ProjectId)
                 .FirstOrDefaultAsync();
 
             if (project == null)
             {
-                throw new NotFoundException("Project not found or is completed.");
+                throw new NotFoundException("Project not found");
+            }
+            
+            if (project.IsCompleted == true)
+            {
+                throw new BadRequestException("Project is completed");
             }
 
             if ((model.EndTime - model.StartTime).TotalMinutes < 15)
