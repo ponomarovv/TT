@@ -2,18 +2,17 @@
 using TT.BLL.Models;
 using TT.DAL.Entities;
 
-namespace TT.BLL
+namespace TT.BLL;
+
+public class MappingProfile : Profile
 {
-    public class MappingProfile : Profile
+    public MappingProfile()
     {
-        public MappingProfile()
-        {
-            CreateMap<Project, ProjectModel>()
-                .ForMember(dest => dest.TotalTimeSpent, opt => opt.Ignore());
+        CreateMap<Project, ProjectModel>()
+            .ForMember(dest => dest.TotalTimeSpent, opt => opt.Ignore());
             
-            // TimeEntry mappings
-            CreateMap<TimeEntry, TimeEntryDTO>().ReverseMap();
-            CreateMap<TimeEntry, CreateTimeEntryDTO>().ReverseMap();
-        }
+        // TimeEntry mappings
+        CreateMap<TimeEntry, TimeEntryDTO>().ReverseMap();
+        CreateMap<TimeEntry, CreateTimeEntryDTO>().ReverseMap();
     }
 }
