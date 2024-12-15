@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using TT.API.Extensions;
 using TT.API.Middleware;
 using TT.BLL;
 using TT.BLL.Services;
@@ -19,7 +20,7 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-app.UseMiddleware<ExceptionMiddleware>();
+app.UseCustomExceptionHandler();
 
 app.UseSwagger();
 app.UseSwaggerUI();
