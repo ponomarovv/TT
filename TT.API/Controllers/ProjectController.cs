@@ -51,12 +51,6 @@ public class ProjectController : ControllerBase
         return NoContent();
     }
 
-    [HttpPost("{id}/time")]
-    public async Task<IActionResult> AddTime(int id, DateTime startTime, DateTime endTime)
-    {
-        await _projectService.AddTimeAsync(id, startTime, endTime);
-        return Ok();
-    }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetProject(int id)
