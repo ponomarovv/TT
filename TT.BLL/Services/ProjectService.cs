@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using TT.BLL.Exceptions;
 using TT.BLL.Models;
 using TT.DAL;
 using TT.DAL.Entities;
@@ -28,10 +29,14 @@ namespace TT.BLL.Services
         public async Task DeleteProjectAsync(int projectId)
         {
             var project = await _dbContext.Projects.FindAsync(projectId);
-            if (project == null) throw new KeyNotFoundException("Project not found.");
+            if (project == null)
+            {
+                throw new NotFoundException("Project not found.");
+            }
             _dbContext.Projects.Remove(project);
             await _dbContext.SaveChangesAsync();
         }
+
 
         public async Task AddTimeAsync(int projectId, DateTime startTime, DateTime endTime)
         {
