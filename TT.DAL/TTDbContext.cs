@@ -17,6 +17,15 @@ namespace TT.DAL
                 .WithOne(te => te.Project)
                 .HasForeignKey(te => te.ProjectId);
 
+            modelBuilder.Entity<TimeEntry>(entity =>
+            {
+                entity.HasKey(te => te.Id);
+                entity.HasOne(te => te.Project)
+                    .WithMany(p => p.TimeEntries)
+                    .HasForeignKey(te => te.ProjectId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+            
             modelBuilder.Entity<TimeEntry>()
                 .HasCheckConstraint("CK_TimeEntry_MinDuration", "DATEDIFF(MINUTE, StartTime, EndTime) >= 15");
         }

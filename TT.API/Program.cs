@@ -13,6 +13,7 @@ builder.Services.AddDbContext<TTDbContext>(options =>
 
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 builder.Services.AddScoped<IProjectService, ProjectService>();
+builder.Services.AddScoped<ITimeEntryService, TimeEntryService>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
