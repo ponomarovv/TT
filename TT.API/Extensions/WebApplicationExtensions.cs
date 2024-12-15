@@ -1,9 +1,11 @@
-﻿namespace TT.API.Extensions;
+﻿using TT.API.Middleware;
+
+namespace TT.API.Extensions;
 
 public static class WebApplicationExtensions
 {
     public static IApplicationBuilder UseCustomExceptionHandler(this IApplicationBuilder app)
     {
-        return app.UseMiddleware<TT.API.Middleware.ExceptionMiddleware>();
+        return app.UseMiddleware<CustomExceptionMiddleware>();
     }
 }

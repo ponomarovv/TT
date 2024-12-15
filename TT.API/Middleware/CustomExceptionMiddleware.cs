@@ -4,11 +4,11 @@ using TT.BLL.Exceptions;
 
 namespace TT.API.Middleware
 {
-    public class ExceptionMiddleware
+    public class CustomExceptionMiddleware
     {
         private readonly RequestDelegate _next;
 
-        public ExceptionMiddleware(RequestDelegate next)
+        public CustomExceptionMiddleware(RequestDelegate next)
         {
             _next = next;
         }
