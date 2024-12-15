@@ -24,14 +24,23 @@ public class TimeEntryService : ITimeEntryService
             .Where(p => p.Id == model.ProjectId)
             .FirstOrDefaultAsync();
 
+
         if (project == null)
         {
             throw new NotFoundException("Project not found");
         }
-            
+
         if (project.IsCompleted == true)
         {
             throw new BadRequestException("Project is completed");
+        }
+
+        // Bonus: Projects can have start and end time. Validate that time added to project fits.
+        if (project.StartTime > model.StartTime || project.EndTime < model.EndTime
+                                                || model.StartTime > project.EndTime ||
+                                                model.EndTime < project.StartTime)
+        {
+            throw new BadRequestException("Time entry does not fit within the project's start and end time.");
         }
 
         if ((model.EndTime - model.StartTime).TotalMinutes < 15)
@@ -40,8 +49,8 @@ public class TimeEntryService : ITimeEntryService
         }
 
         var overlappingEntries = await _dbContext.TimeEntries
-            .Where(te => te.ProjectId == model.ProjectId && 
-                         te.StartTime < model.EndTime && 
+            .Where(te => te.ProjectId == model.ProjectId &&
+                         te.StartTime < model.EndTime &&
                          te.EndTime > model.StartTime)
             .ToListAsync();
 
