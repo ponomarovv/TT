@@ -27,6 +27,20 @@ public class ProjectService : IProjectService
         return _mapper.Map<ProjectModel>(project);
     }
 
+    public async Task<ProjectModel> GetProjectAsync(int projectId)
+    {
+        var project = await _dbContext.Projects.Include(p => p.TimeEntries).FirstOrDefaultAsync(p => p.Id == projectId);
+        if (project == null) throw new NotFoundException("Project not found.");
+
+        var model = _mapper.Map<ProjectModel>(project);
+        
+        double totalTimeSpent = project.TimeEntries
+            .Sum(te => (te.EndTime - te.StartTime).TotalHours);
+        
+        model.TotalTimeSpent = totalTimeSpent;
+        return model;
+    }
+    
     public async Task<ProjectModel> CompleteProjectAsync(int id)
     {
         var project = await _dbContext.Projects.FindAsync(id);
@@ -57,20 +71,5 @@ public class ProjectService : IProjectService
 
         _dbContext.Projects.Remove(project);
         await _dbContext.SaveChangesAsync();
-    }
-
-
-    public async Task<ProjectModel> GetProjectAsync(int projectId)
-    {
-        var project = await _dbContext.Projects.Include(p => p.TimeEntries).FirstOrDefaultAsync(p => p.Id == projectId);
-        if (project == null) throw new NotFoundException("Project not found.");
-
-        var model = _mapper.Map<ProjectModel>(project);
-        
-        double totalTimeSpent = project.TimeEntries
-            .Sum(te => (te.EndTime - te.StartTime).TotalHours);
-        
-        model.TotalTimeSpent = totalTimeSpent;
-        return model;
     }
 }

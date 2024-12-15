@@ -23,7 +23,13 @@ public class ProjectController : ControllerBase
         var project = await _projectService.CreateProjectAsync(name, startTime, endTime);
         return Ok(project);
     }
-
+    
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetProject(int id)
+    {
+        var project = await _projectService.GetProjectAsync(id);
+        return Ok(project);
+    }
 
     [HttpPatch("{id}/complete")]
     public async Task<IActionResult> CompleteProject(int id)
@@ -43,7 +49,6 @@ public class ProjectController : ControllerBase
         }
     }
 
-
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteProject(int id)
     {
@@ -52,10 +57,5 @@ public class ProjectController : ControllerBase
     }
 
 
-    [HttpGet("{id}")]
-    public async Task<IActionResult> GetProject(int id)
-    {
-        var project = await _projectService.GetProjectAsync(id);
-        return Ok(project);
-    }
+   
 }
