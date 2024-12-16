@@ -36,6 +36,8 @@ public class ProjectService : IProjectService
         
         double totalTimeSpent = project.TimeEntries
             .Sum(te => (te.EndTime - te.StartTime).TotalHours);
+
+        totalTimeSpent = Math.Round(totalTimeSpent, 1);
         
         model.TotalTimeSpent = totalTimeSpent;
         return model;

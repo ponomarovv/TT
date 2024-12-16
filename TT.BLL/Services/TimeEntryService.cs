@@ -20,10 +20,12 @@ public class TimeEntryService : ITimeEntryService
 
     public async Task<TimeEntryDTO> CreateTimeEntryAsync(CreateTimeEntryDTO model)
     {
-        var project = await _dbContext.Projects
+        Project? project = await _dbContext.Projects
             .Where(p => p.Id == model.ProjectId)
+            .Include(p => p.TimeEntries)
             .FirstOrDefaultAsync();
 
+        #region error handling
 
         if (project == null)
         {
@@ -43,23 +45,58 @@ public class TimeEntryService : ITimeEntryService
             throw new BadRequestException("Time entry does not fit within the project's start and end time.");
         }
 
+        if (model.StartTime > model.EndTime)
+        {
+            throw new BadRequestException("Time entry's StartTime should be less than the EndTime.");
+        }
+
         if ((model.EndTime - model.StartTime).TotalMinutes < 15)
         {
             throw new BadRequestException("Minimum time entry duration is 15 minutes.");
         }
 
-        var overlappingEntries = await _dbContext.TimeEntries
-            .Where(te => te.ProjectId == model.ProjectId &&
-                         te.StartTime < model.EndTime &&
-                         te.EndTime > model.StartTime)
-            .ToListAsync();
-
-        if (overlappingEntries.Any())
-        {
-            throw new BadRequestException("Time entries overlap with existing entries.");
-        }
+        #endregion
 
         var timeEntry = _mapper.Map<TimeEntry>(model);
+        
+        #region Bonus: Overlapping times can be merged
+        
+        var timeEntryBefore = project.TimeEntries.FirstOrDefault(e => e.EndTime == model.StartTime);
+        var timeEntryAfter = project.TimeEntries.FirstOrDefault(e => e.StartTime == model.EndTime);
+        
+        if (timeEntryBefore != null && timeEntryAfter != null)
+        {
+            await DeleteTimeEntryAsync(timeEntryAfter.Id);
+            
+            timeEntryBefore.EndTime=timeEntryAfter.EndTime;
+            
+            _dbContext.TimeEntries.Update(timeEntryBefore);
+            await _dbContext.SaveChangesAsync();
+
+            return _mapper.Map<TimeEntryDTO>(timeEntryBefore);
+        }
+
+        if (timeEntryBefore != null && timeEntryAfter == null)
+        {
+            timeEntryBefore.EndTime = model.EndTime;
+
+            _dbContext.TimeEntries.Update(timeEntryBefore);
+            await _dbContext.SaveChangesAsync();
+
+            return _mapper.Map<TimeEntryDTO>(timeEntryBefore);
+        }
+
+        if (timeEntryBefore == null && timeEntryAfter != null)
+        {
+            timeEntryAfter.StartTime = model.StartTime;
+
+            _dbContext.TimeEntries.Update(timeEntryAfter);
+            await _dbContext.SaveChangesAsync();
+
+            return _mapper.Map<TimeEntryDTO>(timeEntryAfter);
+        }
+        #endregion
+
         await _dbContext.TimeEntries.AddAsync(timeEntry);
         await _dbContext.SaveChangesAsync();
 
